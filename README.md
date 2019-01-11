@@ -1,6 +1,6 @@
 # Getting started with Cisco SD-WAN REST APIs
 
-The Cisco SD-WAN Solution (a.k.a. Viptela) is a cloud-delivered overlay WAN architecture that facilitates digital and cloud transformation for enterprises. It significantly reduces WAN costs and time to deploy new services.
+The Cisco SD-WAN Solution (a.k.a Viptela) is a cloud-delivered overlay WAN architecture that facilitates digital and cloud transformation for enterprises. It significantly reduces WAN costs and time to deploy new services.
 
 Cisco SD-WAN builds a robust security architecture that's crucial for hybrid networks. It provides a strong policy framework.
 
@@ -14,7 +14,9 @@ The solution has been deployed in every major industry. It solves many critical 
 
 # Project SD-WAN
 
-The goals of this application are two fold. First is to show how simple it is to develop applications that extend the Cisco SD-WAN fabric by using the REST API it provides. Second is to help IT operations teams that are managing Cisco SD-WAN fabrics to make the transition to an automated and programmable infrastructure.
+The goals of this application are two fold. First is to show how simple it is to
+develop applications that extend the Cisco SD-WAN fabric by using the REST API
+it provides. Second is to help IT operations teams that are managing Cisco SD-WAN fabrics to make the transition to an automated and programmable infrastructure.
 
 The main application is a CLI tool through which users can see a list of the devices that are part of the fabric, the configuration templates, which devices are associated to which templates, and options to attach and detach configuration templates to specific devices.
 
@@ -36,17 +38,17 @@ To use this application you will need:
 
 Clone the code to your local machine.
 
-`git clone https://github.com/ai-devnet/Getting-started-with-Cisco-SD-WAN-REST-APIs.git
+`git clone https://github.com/ai-devnet/Getting-started-with-Cisco-SD-WAN-REST-APIs.git`
 
-cd Getting-started-with-Cisco-SD-WAN-REST-APIs`
+`cd Getting-started-with-Cisco-SD-WAN-REST-APIs`
 
 Setup Python Virtual Environment (requires Python 3.6+)
 
-`python3.6 -m venv venv
+`python3.6 -m venv venv`
 
-source venv/bin/activate
+`source venv/bin/activate`
 
-pip install -r requirements.txt`
+`pip install -r requirements.txt`
 
 Setup local environment variables for your Cisco SD-WAN fabric. Provide the info for your Cisco SD-WAN environment.
 
