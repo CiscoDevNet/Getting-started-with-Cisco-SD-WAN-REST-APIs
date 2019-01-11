@@ -12,7 +12,7 @@ The solution has been deployed in every major industry. It solves many critical 
 * Extending seamlessly into the public cloud
 * Providing optimal user experience for SaaS applications
 
-# Project SD-WAN
+### Project SD-WAN
 
 The goals of this application are two fold. First is to show how simple it is to
 develop applications that extend the Cisco SD-WAN fabric by using the REST API
@@ -26,7 +26,7 @@ Example usage:
 devnet01.cisco.com    --sysip 1.1.1.1 --loopip 2.2.2.2/24 --geip
 3.3.3.3/24 --siteid 999`
 
-# Requirements
+### Requirements
 
 To use this application you will need:
 
@@ -34,37 +34,38 @@ To use this application you will need:
 * Cisco SD-WAN 18+
 * A Cisco SD-WAN account with permissions to attach and detach templates
 
-# Install and Setup
+### Install and Setup
 
 Clone the code to your local machine.
 
-`git clone https://github.com/ai-devnet/Getting-started-with-Cisco-SD-WAN-REST-APIs.git`
-
-`cd Getting-started-with-Cisco-SD-WAN-REST-APIs`
+```
+git clone https://github.com/ai-devnet/Getting-started-with-Cisco-SD-WAN-REST-APIs.git
+cd Getting-started-with-Cisco-SD-WAN-REST-APIs
+```
 
 Setup Python Virtual Environment (requires Python 3.6+)
 
-`python3.6 -m venv venv`
-
-`source venv/bin/activate`
-
-`pip install -r requirements.txt`
+```
+python3.6 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 
 Setup local environment variables for your Cisco SD-WAN fabric. Provide the info for your Cisco SD-WAN environment.
 
 Examples:
 
-`export SDWAN_IP=10.10.30.190`
+```
+export SDWAN_IP=10.10.30.190
+export SDWAN_USERNAME=admin
+export SDWAN_PASSWORD=admin
+```
 
-`export SDWAN_USERNAME=admin`
-
-`export SDWAN_PASSWORD=admin`
-
-# Using the application
+### Using the application
 
 Once installed and setup, you can now get started.
 
-Investigate the built in help with the tool.
+Investigate the built-in help with the tool.
 
 `./sdwan.py --help`
 
@@ -128,6 +129,6 @@ To detach a template from a specific device you need to call the detach option o
 
 `./sdwan.py detach --target TargetID --sysip 1.1.1.1`
 
-# POSTMAN
+### POSTMAN
 
 I've also included a POSTMAN environment and collection in the `postman` folder.
