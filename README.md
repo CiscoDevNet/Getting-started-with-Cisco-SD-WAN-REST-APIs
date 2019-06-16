@@ -30,7 +30,7 @@ devnet01.cisco.com    --sysip 1.1.1.1 --loopip 2.2.2.2/24 --geip
 
 To use this application you will need:
 
-* Python 3.6+
+* Python 3.7+
 * Cisco SD-WAN 18+
 * A Cisco SD-WAN account with permissions to attach and detach templates
 
@@ -46,7 +46,7 @@ cd Getting-started-with-Cisco-SD-WAN-REST-APIs
 Setup Python Virtual Environment (requires Python 3.6+)
 
 ```
-python3.6 -m venv venv
+python3.7 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
