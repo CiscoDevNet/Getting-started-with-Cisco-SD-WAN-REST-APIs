@@ -54,6 +54,8 @@ class rest_api_lib:
         sess = requests.session()
         #If the vmanage has a certificate signed by a trusted authority change verify to True
         login_response = sess.post(url=login_url, data=login_data, verify=False)
+        print('login_response')
+        print(login_response)
 
     
         if b'<html>' in login_response.content:
