@@ -54,7 +54,7 @@ pip install -r requirements.txt
 Setup local environment variables for your Cisco SD-WAN fabric. Provide the info for your Cisco SD-WAN environment.
 
 Examples:
-"https://sandboxsdwan.cisco.com:8443/j_security_check"
+
 ```
 export SDWAN_IP=sandboxsdwan.cisco.com
 export SDWAN_USERNAME=devnetuser

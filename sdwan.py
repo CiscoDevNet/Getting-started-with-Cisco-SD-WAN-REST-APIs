@@ -42,7 +42,7 @@ class rest_api_lib:
         """Login to vmanage"""
         base_url_str = 'https://%s:8443/'%vmanage_ip
 
-        login_action = 'j_security_check'
+        login_action = '/j_security_check'
 
         #Format data for loginForm
         login_data = {'j_username' : username, 'j_password' : password}
