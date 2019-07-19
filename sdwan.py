@@ -55,7 +55,7 @@ class rest_api_lib:
         #If the vmanage has a certificate signed by a trusted authority change verify to True
         login_response = sess.post(url=login_url, data=login_data, verify=False)
 
-    
+
         if b'<html>' in login_response.content:
             print ("Login Failed")
             sys.exit(0)
@@ -157,7 +157,7 @@ def attached_devices(template):
 
     response = json.loads(sdwanp.get_request(url))
     items = response['data']
-    
+
     headers = ["Host Name", "Device IP", "Site ID", "Host ID", "Host Type"]
     table = list()
 
@@ -185,7 +185,7 @@ def attach(template, target, hostname, sysip, loopip, geip, siteid):
 
         Example command:
 
-          ./sdwan.py attach --template TemplateID --target TargetID --hostname devnet01.cisco.com 
+          ./sdwan.py attach --template TemplateID --target TargetID --hostname devnet01.cisco.com
           --sysip 1.1.1.1 --loopip 2.2.2.2/24 --geip 3.3.3.3/24 --siteid 999
     """
     click.secho("Attempting to attach template.")
@@ -193,8 +193,8 @@ def attach(template, target, hostname, sysip, loopip, geip, siteid):
     payload = {
         "deviceTemplateList":[
         {
-            "templateId":str(template),       
-            "device":[ 
+            "templateId":str(template),
+            "device":[
             {
                 "csv-status":"complete",
                 "csv-deviceId":str(target),
@@ -209,8 +209,8 @@ def attach(template, target, hostname, sysip, loopip, geip, siteid):
                 "selected":"true"
             }
             ],
-            "isEdited":"false", 
-            "isMasterEdited":"false" 
+            "isEdited":"false",
+            "isMasterEdited":"false"
         }
         ]
     }
@@ -234,7 +234,7 @@ def detach(target, sysip):
 
     payload = {
         "deviceType":"vedge",
-        "devices":[  
+        "devices":[
             {
                 "deviceId":str(target),
                 "deviceIP":str(sysip)
@@ -245,12 +245,34 @@ def detach(target, sysip):
     response = sdwanp.post_request('template/config/device/mode/cli', payload)
     print (response)
 
+@click.command()
+@click.option("--file", help="Specify .json file containing CLI Template")
+def new_cli_template(file):
+    """Uploads new CLI device template from json file.
+
+        Example command:
+
+            ./sdwan.py new_cli_template
+            ./sdwan.py new_cli_template --file newcli.json
+
+    """
+    if not file:
+        file = input("Please specify filename:")
+
+    click.secho("Uploading New CLI Tempalte")
+
+    with open(file) as f:
+        payload = json.load(f)
+
+    response = sdwanp.post_request('template/device/cli', payload)
+    print(response)
+
 cli.add_command(attach)
 cli.add_command(detach)
 cli.add_command(device_list)
 cli.add_command(attached_devices)
 cli.add_command(template_list)
+cli.add_command(new_cli_template)
 
 if __name__ == "__main__":
     cli()
-   
