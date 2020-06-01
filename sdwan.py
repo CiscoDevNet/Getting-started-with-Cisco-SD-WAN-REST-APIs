@@ -26,7 +26,7 @@ SDWAN_PASSWORD = os.environ.get("SDWAN_PASSWORD")
 
 if SDWAN_IP is None or SDWAN_USERNAME is None or SDWAN_PASSWORD is None:
     print("CISCO SDWAN details must be set via environment variables before running.")
-    print("   export SDWAN_IP=10.10.30.190")
+    print("   export SDWAN_IP=10.10.20.90")
     print("   export SDWAN_USERNAME=admin")
     print("   export SDWAN_PASSWORD=admin")
     print("")
@@ -40,7 +40,7 @@ class rest_api_lib:
 
     def login(self, vmanage_ip, username, password):
         """Login to vmanage"""
-        base_url_str = 'https://%s:8443/'%vmanage_ip
+        base_url_str = 'https://%s/'%vmanage_ip
 
         login_action = '/j_security_check'
 
@@ -62,9 +62,27 @@ class rest_api_lib:
 
         self.session[vmanage_ip] = sess
 
+        token_url = ''https://%s/'%vmanage_ip'
+
+        token_action = '/dataservice/client/token'
+
+        token = session.get(url=token_url)
+        # print(token)
+        headers = {'X-XSRF-TOKEN':token}
+        
+        if token.status_code != 200:
+            if b'<html>' in token_url.content:
+                print(token_url)
+                print ("Login Token Failed")
+                exit(0)
+        else:
+            print("Token Success")
+        
+        token = token.text
+
     def get_request(self, mount_point):
         """GET request"""
-        url = "https://%s:8443/dataservice/%s"%(self.vmanage_ip, mount_point)
+        url = "https://%s/dataservice/%s"%(self.vmanage_ip, mount_point)
         #print url
         response = self.session[self.vmanage_ip].get(url, verify=False)
         data = response.content
@@ -72,7 +90,7 @@ class rest_api_lib:
 
     def post_request(self, mount_point, payload, headers={'Content-Type': 'application/json'}):
         """POST request"""
-        url = "https://%s:8443/dataservice/%s"%(self.vmanage_ip, mount_point)
+        url = "https://%s/dataservice/%s"%(self.vmanage_ip, mount_point)
         payload = json.dumps(payload)
         print (payload)
 
