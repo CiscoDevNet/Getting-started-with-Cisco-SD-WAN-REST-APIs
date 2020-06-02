@@ -21,11 +21,11 @@ def login(vmanage_ip, username, password):
             print ("Login Failed")
             sys.exit(0)
         
-        token_url = ''https://%s/'%vmanage_ip'
+        token_url = 'https://%s/'%vmanage_ip
 
         token_action = '/dataservice/client/token'
 
-        token = session.get(url=token_url)
+        token = sess.get(url=token_url)
         # print(token)
         headers = {'X-XSRF-TOKEN':token}
         

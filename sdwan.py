@@ -62,11 +62,11 @@ class rest_api_lib:
 
         self.session[vmanage_ip] = sess
 
-        token_url = ''https://%s/'%vmanage_ip'
+        token_url = 'https://%s/'%vmanage_ip
 
         token_action = '/dataservice/client/token'
 
-        token = session.get(url=token_url)
+        token = sess.get(url=token_url)
         # print(token)
         headers = {'X-XSRF-TOKEN':token}
         
@@ -192,11 +192,12 @@ def attached_devices(template):
 @click.option("--target", help="Hostname of target network device.")
 @click.option("--hostname", help="Hostname you wish the target has")
 @click.option("--sysip", help="System IP you wish the target has")
-@click.option("--loopip", help="Loopback interface IP address")
+# @click.option("--loopip", help="Loopback interface IP address")
 @click.option("--geip", help="Gigabit0/0 interface IP address")
 @click.option("--siteid", help="Site ID")
 #@click.argument("parameters", nargs=-1)
-def attach(template, target, hostname, sysip, loopip, geip, siteid):
+# def attach(template, target, hostname, sysip, loopip, geip, siteid):
+def attach(template, target, hostname, sysip, geip, siteid):
     """Attach a template with Cisco SDWAN.
 
         Provide all template parameters and their values as arguments.
@@ -204,7 +205,7 @@ def attach(template, target, hostname, sysip, loopip, geip, siteid):
         Example command:
 
           ./sdwan.py attach --template TemplateID --target TargetID --hostname devnet01.cisco.com 
-          --sysip 1.1.1.1 --loopip 2.2.2.2/24 --geip 3.3.3.3/24 --siteid 999
+          --sysip 1.1.1.1 --geip 3.3.3.3/24 --siteid 999
     """
     click.secho("Attempting to attach template.")
 
@@ -218,7 +219,7 @@ def attach(template, target, hostname, sysip, loopip, geip, siteid):
                 "csv-deviceId":str(target),
                 "csv-deviceIP":str(sysip),
                 "csv-host-name":str(hostname),
-                "/1/loopback1/interface/ip/address":str(loopip),
+                # "/1/loopback1/interface/ip/address":str(loopip),
 		        "/0/ge0/0/interface/ip/address":str(geip),
                 "//system/host-name":str(hostname),
                 "//system/system-ip":str(sysip),
