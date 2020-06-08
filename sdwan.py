@@ -26,7 +26,7 @@ SDWAN_PASSWORD = os.environ.get("SDWAN_PASSWORD")
 
 if SDWAN_IP is None or SDWAN_USERNAME is None or SDWAN_PASSWORD is None:
     print("CISCO SDWAN details must be set via environment variables before running.")
-    print("   export SDWAN_IP=10.10.30.190")
+    print("   export SDWAN_IP=10.10.20.90")
     print("   export SDWAN_USERNAME=admin")
     print("   export SDWAN_PASSWORD=admin")
     print("")
@@ -40,7 +40,7 @@ class rest_api_lib:
 
     def login(self, vmanage_ip, username, password):
         """Login to vmanage"""
-        base_url_str = 'https://%s:8443/'%vmanage_ip
+        base_url_str = 'https://%s/'%vmanage_ip
 
         login_action = '/j_security_check'
 
@@ -62,9 +62,27 @@ class rest_api_lib:
 
         self.session[vmanage_ip] = sess
 
+        token_url = 'https://%s/'%vmanage_ip
+
+        token_action = '/dataservice/client/token'
+
+        token = sess.get(url=token_url)
+        # print(token)
+        headers = {'X-XSRF-TOKEN':token}
+        
+        if token.status_code != 200:
+            if b'<html>' in token_url.content:
+                print(token_url)
+                print ("Login Token Failed")
+                exit(0)
+        else:
+            print("Token Success")
+        
+        token = token.text
+
     def get_request(self, mount_point):
         """GET request"""
-        url = "https://%s:8443/dataservice/%s"%(self.vmanage_ip, mount_point)
+        url = "https://%s/dataservice/%s"%(self.vmanage_ip, mount_point)
         #print url
         response = self.session[self.vmanage_ip].get(url, verify=False)
         data = response.content
@@ -72,7 +90,7 @@ class rest_api_lib:
 
     def post_request(self, mount_point, payload, headers={'Content-Type': 'application/json'}):
         """POST request"""
-        url = "https://%s:8443/dataservice/%s"%(self.vmanage_ip, mount_point)
+        url = "https://%s/dataservice/%s"%(self.vmanage_ip, mount_point)
         payload = json.dumps(payload)
         print (payload)
 
@@ -174,11 +192,12 @@ def attached_devices(template):
 @click.option("--target", help="Hostname of target network device.")
 @click.option("--hostname", help="Hostname you wish the target has")
 @click.option("--sysip", help="System IP you wish the target has")
-@click.option("--loopip", help="Loopback interface IP address")
+# @click.option("--loopip", help="Loopback interface IP address")
 @click.option("--geip", help="Gigabit0/0 interface IP address")
 @click.option("--siteid", help="Site ID")
 #@click.argument("parameters", nargs=-1)
-def attach(template, target, hostname, sysip, loopip, geip, siteid):
+# def attach(template, target, hostname, sysip, loopip, geip, siteid):
+def attach(template, target, hostname, sysip, geip, siteid):
     """Attach a template with Cisco SDWAN.
 
         Provide all template parameters and their values as arguments.
@@ -186,7 +205,7 @@ def attach(template, target, hostname, sysip, loopip, geip, siteid):
         Example command:
 
           ./sdwan.py attach --template TemplateID --target TargetID --hostname devnet01.cisco.com 
-          --sysip 1.1.1.1 --loopip 2.2.2.2/24 --geip 3.3.3.3/24 --siteid 999
+          --sysip 1.1.1.1 --geip 3.3.3.3/24 --siteid 999
     """
     click.secho("Attempting to attach template.")
 
@@ -200,7 +219,7 @@ def attach(template, target, hostname, sysip, loopip, geip, siteid):
                 "csv-deviceId":str(target),
                 "csv-deviceIP":str(sysip),
                 "csv-host-name":str(hostname),
-                "/1/loopback1/interface/ip/address":str(loopip),
+                # "/1/loopback1/interface/ip/address":str(loopip),
 		        "/0/ge0/0/interface/ip/address":str(geip),
                 "//system/host-name":str(hostname),
                 "//system/system-ip":str(sysip),

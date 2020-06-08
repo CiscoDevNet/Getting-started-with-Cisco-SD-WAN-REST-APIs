@@ -3,7 +3,7 @@ import sys
 
 def login(vmanage_ip, username, password):
         """Login to vmanage"""
-        base_url_str = 'https://%s:8443/'%vmanage_ip
+        base_url_str = 'https://%s/'%vmanage_ip
 
         login_action = '/j_security_check'
 
@@ -20,3 +20,21 @@ def login(vmanage_ip, username, password):
         if b'<html>' in login_response.content:
             print ("Login Failed")
             sys.exit(0)
+        
+        token_url = 'https://%s/'%vmanage_ip
+
+        token_action = '/dataservice/client/token'
+
+        token = sess.get(url=token_url)
+        # print(token)
+        headers = {'X-XSRF-TOKEN':token}
+        
+        if token.status_code != 200:
+            if b'<html>' in token_url.content:
+                print(token_url)
+                print ("Login Token Failed")
+                exit(0)
+        else:
+            print("Token Success")
+        
+        token = token.text
