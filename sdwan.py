@@ -219,7 +219,6 @@ def attach(template, target, hostname, sysip, geip, siteid):
                 "csv-deviceId":str(target),
                 "csv-deviceIP":str(sysip),
                 "csv-host-name":str(hostname),
-                # "/1/loopback1/interface/ip/address":str(loopip),
 		        "/0/ge0/0/interface/ip/address":str(geip),
                 "//system/host-name":str(hostname),
                 "//system/system-ip":str(sysip),
