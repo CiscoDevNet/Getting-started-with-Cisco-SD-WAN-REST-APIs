@@ -22,9 +22,7 @@ The main application is a CLI tool through which users can see a list of the dev
 
 Example usage:
 
-`./sdwan.py attach --template TemplateID --target TargetID --hostname
-devnet01.cisco.com    --sysip 1.1.1.1 --loopip 2.2.2.2/24 --geip
-3.3.3.3/24 --siteid 999`
+`./sdwan.py attach --template db4c997a-7212-4ec1-906e-ed2b86c3f42f --variables Site-3-vEdge-Variables.yaml`
 
 ### Requirements
 
@@ -56,9 +54,10 @@ Setup local environment variables for your Cisco SD-WAN fabric. Provide the info
 Examples:
 
 ```
-export SDWAN_IP=10.10.30.190
-export SDWAN_USERNAME=admin
-export SDWAN_PASSWORD=admin
+export vManage_IP=10.10.20.90
+export vManage_PORT=8443
+export vManage_USERNAME=admin
+export vManage_PASSWORD=C1sco12345
 ```
 
 ### Using the application
@@ -95,10 +94,17 @@ OUTPUT
 
 ```
 Retrieving the templates available.
-
-| Template Name        | Device Type   | Template ID                          |   Attached devices |   Template version |
-|----------------------|---------------|--------------------------------------|--------------------|--------------------|
-| VEDGE_BASIC_TEMPLATE | vedge-cloud   | 72babaf2-68b6-4176-92d5-fa8de58e19d8 |                  0 |                 15 |
+╒═════════════════════════════╤═════════════════╤══════════════════════════════════════╤════════════════════╤════════════════════╕
+│ Template Name               │ Device Type     │ Template ID                          │   Attached devices │   Template version │
+╞═════════════════════════════╪═════════════════╪══════════════════════════════════════╪════════════════════╪════════════════════╡
+│ vSmart_Template             │ vsmart          │ 90f26d2d-8136-4414-84de-4e8df52374e6 │                  1 │                  9 │
+├─────────────────────────────┼─────────────────┼──────────────────────────────────────┼────────────────────┼────────────────────┤
+│ Site_1_and_2_cEdge_Template │ vedge-CSR-1000v │ c566d38e-2219-4764-a714-4abeeab607dc │                  2 │                 13 │
+├─────────────────────────────┼─────────────────┼──────────────────────────────────────┼────────────────────┼────────────────────┤
+│ Site_3_vEdge_Template       │ vedge-cloud     │ db4c997a-7212-4ec1-906e-ed2b86c3f42f │                  1 │                 13 │
+├─────────────────────────────┼─────────────────┼──────────────────────────────────────┼────────────────────┼────────────────────┤
+│ DC_cEdge_Template           │ vedge-CSR-1000v │ 24d4be69-8038-48a3-b546-c6df199b6e29 │                  1 │                 14 │
+╘═════════════════════════════╧═════════════════╧══════════════════════════════════════╧════════════════════╧════════════════════╛
 ```
 
 Retrieve the list of devices that make up the SD-WAN fabric with ./sdwan.py device_list.
@@ -109,25 +115,46 @@ OUTPUT
 
 ```
 Retrieving the devices.
-
-| Host-Name   | Device Type   | Device ID                            | System IP   |   Site ID | Version   | Device Model   |
-|-------------|---------------|--------------------------------------|-------------|-----------|-----------|----------------|
-| vmanage     | vmanage       | 4854266f-a8ad-4068-9651-d4e834384f51 | 4.4.4.90    |       100 | 18.3.1.1  | vmanage        |
-| vsmart      | vsmart        | da6c566f-eb5f-4731-a89a-ff745661027c | 4.4.4.70    |       100 | 18.3.0    | vsmart         |
-| vbond       | vbond         | 455407de-9327-467e-a0d2-d3444659dbb2 | 4.4.4.80    |       100 | 18.3.1    | vedge-cloud    |
-| vedge01     | vedge         | 4af9e049-0052-47e9-83af-81a5825f7ffe | 4.4.4.60    |       200 | 18.3.1    | vedge-cloud    |
-| vedge02     | vedge         | f3d4159b-4172-462c-9c8d-8db76c31521d | 4.4.4.61    |       300 | 18.3.1    | vedge-cloud    |
-| vedge03     | vedge         | 100faff9-8b36-4312-bf97-743b26bd0211 | 4.4.4.62    |       400 | 18.3.1    | vedge-cloud    |
-| vedge04     | vedge         | 46c18a49-f6f3-4588-a49a-0b1cc387f179 | 4.4.4.63    |       500 | 18.3.1    | vedge-cloud    |
+╒═══════════════╤═══════════════╤══════════════════════════════════════════╤═════════════╤═══════════╤════════════════╤═════════════════╕
+│ Host-Name     │ Device Type   │ Device ID                                │ System IP   │   Site ID │ Version        │ Device Model    │
+╞═══════════════╪═══════════════╪══════════════════════════════════════════╪═════════════╪═══════════╪════════════════╪═════════════════╡
+│ vmanage       │ vmanage       │ 81ac6722-a226-4411-9d5d-45c0ca7d567b     │ 10.10.1.1   │       101 │ 19.2.2         │ vmanage         │
+├───────────────┼───────────────┼──────────────────────────────────────────┼─────────────┼───────────┼────────────────┼─────────────────┤
+│ vsmart        │ vsmart        │ f7b49da3-383e-4cd5-abc1-c8e97d345a9f     │ 10.10.1.5   │       101 │ 19.2.2         │ vsmart          │
+├───────────────┼───────────────┼──────────────────────────────────────────┼─────────────┼───────────┼────────────────┼─────────────────┤
+│ vbond         │ vbond         │ ed0863cb-83e7-496c-b118-068e2371b13c     │ 10.10.1.3   │       101 │ 19.2.2         │ vedge-cloud     │
+├───────────────┼───────────────┼──────────────────────────────────────────┼─────────────┼───────────┼────────────────┼─────────────────┤
+│ dc-cedge01    │ vedge         │ CSR-61CD2335-4775-650F-8538-4EC7BDFFD04C │ 10.10.1.11  │       100 │ 16.12.3.0.3752 │ vedge-CSR-1000v │
+├───────────────┼───────────────┼──────────────────────────────────────────┼─────────────┼───────────┼────────────────┼─────────────────┤
+│ site1-cedge01 │ vedge         │ CSR-807E37A3-537A-07BA-BD71-8FB76DE9DC38 │ 10.10.1.13  │      1001 │ 16.12.3.0.3752 │ vedge-CSR-1000v │
+├───────────────┼───────────────┼──────────────────────────────────────────┼─────────────┼───────────┼────────────────┼─────────────────┤
+│ site2-cedge01 │ vedge         │ CSR-DE6DAB19-BA1A-E543-959C-FD117F4A6205 │ 10.10.1.15  │      1002 │ 16.12.3.0.3752 │ vedge-CSR-1000v │
+├───────────────┼───────────────┼──────────────────────────────────────────┼─────────────┼───────────┼────────────────┼─────────────────┤
+│ site3-vedge01 │ vedge         │ 0140a336-5fd5-9829-10d2-f6ba0b177efd     │ 10.10.1.17  │      1003 │ 19.2.2         │ vedge-cloud     │
+╘═══════════════╧═══════════════╧══════════════════════════════════════════╧═════════════╧═══════════╧════════════════╧═════════════════╛
 ```
 
 Attaching a template is as easy as calling the *attach* option of the application and passing in the requested parameters.
 
-`./sdwan.py attach --template TemplateID --target TargetID --hostname devnet01.cisco.com --sysip 1.1.1.1 --loopip 2.2.2.2/24 --geip 3.3.3.3/24 --siteid 999`
+`./sdwan.py attach --template db4c997a-7212-4ec1-906e-ed2b86c3f42f --variables Site-3-vEdge-Variables.yaml`
+
+OUTPUT
+
+```
+Attempting to attach template.
+Attached Site 3 vEdge Template
+```
 
 To detach a template from a specific device you need to call the detach option of the application and pass in the parameters for the target device ID and the system-ip of that device:
 
-`./sdwan.py detach --target TargetID --sysip 1.1.1.1`
+`./sdwan.py detach --target 0140a336-5fd5-9829-10d2-f6ba0b177efd --sysip 10.10.1.17`
+
+OUTPUT
+
+```
+Attempting to detach template.
+Changed configuration mode to CLI
+```
 
 ### POSTMAN
 

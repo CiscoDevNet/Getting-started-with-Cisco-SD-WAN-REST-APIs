@@ -17,70 +17,65 @@ import json
 import click
 import os
 import tabulate
+import yaml
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-SDWAN_IP = os.environ.get("SDWAN_IP")
-SDWAN_USERNAME = os.environ.get("SDWAN_USERNAME")
-SDWAN_PASSWORD = os.environ.get("SDWAN_PASSWORD")
+vmanage_host = os.environ.get("vManage_IP")
+vmanage_port = os.environ.get("vManage_PORT")
+vmanage_username = os.environ.get("vManage_USERNAME")
+vmanage_password = os.environ.get("vManage_PASSWORD")
 
-if SDWAN_IP is None or SDWAN_USERNAME is None or SDWAN_PASSWORD is None:
+if vmanage_host is None or vmanage_port is None or vmanage_username is None or vmanage_password is None :
     print("CISCO SDWAN details must be set via environment variables before running.")
-    print("   export SDWAN_IP=10.10.30.190")
-    print("   export SDWAN_USERNAME=admin")
-    print("   export SDWAN_PASSWORD=admin")
+    print("export vManage_IP=10.10.20.90")
+    print("export vManage_PORT=8443")
+    print("export vManage_USERNAME=admin")
+    print("export vManage_PASSWORD=C1sco12345")
     print("")
-    exit("1")
+    exit()
 
-class rest_api_lib:
-    def __init__(self, vmanage_ip, username, password):
-        self.vmanage_ip = vmanage_ip
-        self.session = {}
-        self.login(self.vmanage_ip, username, password)
+class Authentication:
 
-    def login(self, vmanage_ip, username, password):
-        """Login to vmanage"""
-        base_url_str = 'https://%s:8443/'%vmanage_ip
+    @staticmethod
+    def get_jsessionid(vmanage_host, vmanage_port, username, password):
+        api = "/j_security_check"
+        base_url = "https://%s:%s"%(vmanage_host, vmanage_port)
+        url = base_url + api
+        payload = {'j_username' : username, 'j_password' : password}
+        
+        response = requests.post(url=url, data=payload, verify=False)
+        try:
+            cookies = response.headers["Set-Cookie"]
+            jsessionid = cookies.split(";")
+            return(jsessionid[0])
+        except:
+            if logger is not None:
+                logger.error("No valid JSESSION ID returned\n")
+            exit()
+       
+    @staticmethod
+    def get_token(vmanage_host, vmanage_port, jsessionid):
+        headers = {'Cookie': jsessionid}
+        base_url = "https://%s:%s"%(vmanage_host, vmanage_port)
+        api = "/dataservice/client/token"
+        url = base_url + api      
+        response = requests.get(url=url, headers=headers, verify=False)
+        if response.status_code == 200:
+            return(response.text)
+        else:
+            return None
 
-        login_action = '/j_security_check'
+Auth = Authentication()
+jsessionid = Auth.get_jsessionid(vmanage_host,vmanage_port,vmanage_username,vmanage_password)
+token = Auth.get_token(vmanage_host,vmanage_port,jsessionid)
 
-        #Format data for loginForm
-        login_data = {'j_username' : username, 'j_password' : password}
+if token is not None:
+    header = {'Content-Type': "application/json",'Cookie': jsessionid, 'X-XSRF-TOKEN': token}
+else:
+    header = {'Content-Type': "application/json",'Cookie': jsessionid}
 
-        #Url for posting login data
-        login_url = base_url_str + login_action
-        url = base_url_str + login_url
-
-        sess = requests.session()
-        #If the vmanage has a certificate signed by a trusted authority change verify to True
-        login_response = sess.post(url=login_url, data=login_data, verify=False)
-
-    
-        if b'<html>' in login_response.content:
-            print ("Login Failed")
-            sys.exit(0)
-
-        self.session[vmanage_ip] = sess
-
-    def get_request(self, mount_point):
-        """GET request"""
-        url = "https://%s:8443/dataservice/%s"%(self.vmanage_ip, mount_point)
-        #print url
-        response = self.session[self.vmanage_ip].get(url, verify=False)
-        data = response.content
-        return data
-
-    def post_request(self, mount_point, payload, headers={'Content-Type': 'application/json'}):
-        """POST request"""
-        url = "https://%s:8443/dataservice/%s"%(self.vmanage_ip, mount_point)
-        payload = json.dumps(payload)
-        print (payload)
-
-        response = self.session[self.vmanage_ip].post(url=url, data=payload, headers=headers, verify=False)
-        data = response.json()
-        return data
-
-sdwanp = rest_api_lib(SDWAN_IP, SDWAN_USERNAME, SDWAN_PASSWORD)
+base_url = "https://%s:%s/dataservice"%(vmanage_host, vmanage_port)
 
 @click.group()
 def cli():
@@ -101,8 +96,14 @@ def device_list():
     """
     click.secho("Retrieving the devices.")
 
-    response = json.loads(sdwanp.get_request('device'))
-    items = response['data']
+    url = base_url + "/device"
+
+    response = requests.get(url=url, headers=header,verify=False)
+    if response.status_code == 200:
+        items = response.json()['data']
+    else:
+        print("Failed to get list of devices " + str(response.text))
+        exit()
 
     headers = ["Host-Name", "Device Type", "Device ID", "System IP", "Site ID", "Version", "Device Model"]
     table = list()
@@ -128,8 +129,14 @@ def template_list():
     """
     click.secho("Retrieving the templates available.")
 
-    response = json.loads(sdwanp.get_request('template/device'))
-    items = response['data']
+    url = base_url + "/template/device"
+
+    response = requests.get(url=url, headers=header,verify=False)
+    if response.status_code == 200:
+        items = response.json()['data']
+    else:
+        print("Failed to get list of templates")
+        exit()
 
     headers = ["Template Name", "Device Type", "Template ID", "Attached devices", "Template version"]
     table = list()
@@ -149,15 +156,19 @@ def attached_devices(template):
 
         Example command:
 
-            ./sdwan.py attached_devices --template abcd1234567890
+            ./sdwan.py attached_devices --template db4c997a-7212-4ec1-906e-ed2b86c3f42f
 
     """
 
-    url = "template/device/config/attached/{0}".format(template)
+    url = base_url + "/template/device/config/attached/{0}".format(template)
 
-    response = json.loads(sdwanp.get_request(url))
-    items = response['data']
-    
+    response = requests.get(url=url, headers=header,verify=False)
+    if response.status_code == 200:
+        items = response.json()['data']
+    else:
+        print("Failed to get template details")
+        exit()
+
     headers = ["Host Name", "Device IP", "Site ID", "Host ID", "Host Type"]
     table = list()
 
@@ -171,55 +182,88 @@ def attached_devices(template):
 
 @click.command()
 @click.option("--template", help="Name of the template to deploy")
-@click.option("--target", help="Hostname of target network device.")
-@click.option("--hostname", help="Hostname you wish the target has")
-@click.option("--sysip", help="System IP you wish the target has")
-@click.option("--loopip", help="Loopback interface IP address")
-@click.option("--geip", help="Gigabit0/0 interface IP address")
-@click.option("--siteid", help="Site ID")
+@click.option("--variables", help="Device Template variable values yaml file")
 #@click.argument("parameters", nargs=-1)
-def attach(template, target, hostname, sysip, loopip, geip, siteid):
+def attach(template, variables):
     """Attach a template with Cisco SDWAN.
 
         Provide all template parameters and their values as arguments.
 
         Example command:
 
-          ./sdwan.py attach --template TemplateID --target TargetID --hostname devnet01.cisco.com 
-          --sysip 1.1.1.1 --loopip 2.2.2.2/24 --geip 3.3.3.3/24 --siteid 999
+          ./sdwan.py attach --template template-id --variables Site-3-vEdge-Variables.yaml
     """
     click.secho("Attempting to attach template.")
+    
+    with open(variables) as f:
+        config = yaml.safe_load(f.read())
+
+    system_ip = config.get("system_ip")
+    host_name = config.get("host_name")
+    template_id = template
+
+    template_variables = {
+                            "csv-status":"complete",
+                            "csv-deviceId": config.get("device_id"),
+                            "csv-deviceIP": system_ip,
+                            "csv-host-name": host_name,
+                            "//system/host-name": host_name,
+                            "//system/system-ip": system_ip,
+                            "//system/site-id": config.get("site_id"),
+                            "/1/vpn_1_if_name/interface/if-name": config.get("vpn_1_if_name"),
+                            "/1/vpn_1_if_name/interface/ip/address": config.get("vpn_1_if_ipv4_address"),
+                            "/512/vpn-instance/ip/route/0.0.0.0/0/next-hop/vpn_512_next_hop_ip_address/address": config.get("vpn_512_next_hop_ip_address"),
+                            "/512/vpn_512_if_name/interface/if-name": config.get("vpn_512_if_name"),
+                            "/512/vpn_512_if_name/interface/ip/address": config.get("vpn_512_if_ipv4_address"),
+                            "/0/vpn-instance/ip/route/0.0.0.0/0/next-hop/mpls_next_hop/address": config.get("mpls_next_hop"),
+                            "/0/vpn-instance/ip/route/0.0.0.0/0/next-hop/public_internet_next_hop/address": config.get("public_internet_next_hop"),
+                            "/0/vpn_public_internet_interface/interface/if-name": config.get("vpn_public_internet_interface"),
+                            "/0/vpn_public_internet_interface/interface/ip/address": config.get("vpn_public_interface_if_ipv4_address"),
+                            "/0/vpn_mpls_interface/interface/if-name": config.get("vpn_mpls_interface"),
+                            "/0/vpn_mpls_interface/interface/ip/address": config.get("vpn_mpls_if_ipv4_address"),
+                            "//system/gps-location/latitude": config.get("latitude"),
+                            "//system/gps-location/longitude": config.get("longitude")
+                         }
+
 
     payload = {
         "deviceTemplateList":[
         {
-            "templateId":str(template),       
-            "device":[ 
-            {
-                "csv-status":"complete",
-                "csv-deviceId":str(target),
-                "csv-deviceIP":str(sysip),
-                "csv-host-name":str(hostname),
-                "/1/loopback1/interface/ip/address":str(loopip),
-		        "/0/ge0/0/interface/ip/address":str(geip),
-                "//system/host-name":str(hostname),
-                "//system/system-ip":str(sysip),
-                "//system/site-id":str(siteid),
-                "csv-templateId":str(template),
-                "selected":"true"
-            }
-            ],
+            "templateId":template_id,       
+            "device":[ template_variables ],
             "isEdited":"false", 
             "isMasterEdited":"false" 
         }
         ]
     }
 
-    response = sdwanp.post_request('template/device/config/attachfeature', payload)
-    print (response)
+    url = base_url + "/template/device/config/attachfeature"
+
+    response = requests.post(url=url, data=json.dumps(payload), headers=header, verify=False)
+    if response.status_code == 200:
+        attach_template_pushid = response.json()['id']
+        url = base_url + "/device/action/status/%s"%attach_template_pushid
+        while(1):
+            template_status_res = requests.get(url,headers=header,verify=False)
+            if template_status_res.status_code == 200:
+                template_push_status = template_status_res.json()
+                if template_push_status['summary']['status'] == "done":
+                    if 'Success' in template_push_status['summary']['count']:
+                        print("Attached Site 3 vEdge Template")
+                    elif 'Failure' in template_push_status['summary']['count']:
+                        print("Failed to attach Site 3 vEdge Template")
+                        exit()
+                    break
+            else:             
+                print("\nFetching template push status failed")
+                exit()
+
+    else:
+        print("Failed to attach Site 3 vEdge Template")
+        exit()
 
 @click.command()
-@click.option("--target", help="ID of the  to detach")
+@click.option("--target", help="ID of the device to detach")
 @click.option("--sysip", help="System IP of the system to detach")
 def detach(target, sysip):
     """Detach a template with Cisco SDWAN.
@@ -242,8 +286,26 @@ def detach(target, sysip):
         ]
     }
 
-    response = sdwanp.post_request('template/config/device/mode/cli', payload)
-    print (response)
+    url = base_url + "/template/config/device/mode/cli"
+
+    response = requests.post(url=url, data=json.dumps(payload), headers=header, verify=False)
+    if response.status_code == 200:
+        id = response.json()["id"]
+        url = base_url + "/device/action/status/" + str(id)
+        while(1):
+            status_res = requests.get(url,headers=header,verify=False)
+            if status_res.status_code == 200:
+                push_status = status_res.json()
+                if push_status['summary']['status'] == "done":
+                    if 'Success' in push_status['summary']['count']:
+                        print("Changed configuration mode to CLI")
+                    elif 'Failure' in push_status['summary']['count']:
+                        print("Failed to change configuration mode to CLI")
+                        exit()
+                    break
+    else:
+        print("Failed to detach template with error " + response.text)
+        exit()
 
 cli.add_command(attach)
 cli.add_command(detach)
