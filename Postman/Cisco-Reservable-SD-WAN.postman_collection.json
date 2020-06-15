@@ -1,0 +1,315 @@
+{
+	"info": {
+		"_postman_id": "6b9300d8-c5fb-48d7-85fd-57d4353cd903",
+		"name": "Cisco-Reservable-SD-WAN",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1.Authentication",
+			"item": [
+				{
+					"name": "Authentication",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "j_username",
+									"value": "{{j_username}}",
+									"type": "text"
+								},
+								{
+									"key": "j_password",
+									"value": "{{j_password}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://{{vmanage}}:{{port}}/j_security_check",
+							"protocol": "https",
+							"host": [
+								"{{vmanage}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"j_security_check"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "92af74e2-ccda-4a82-912a-7554abf16ea9",
+								"exec": [
+									"var XSRFToken = pm.response.text()",
+									"pm.environment.set(\"X-XSRF-TOKEN\", XSRFToken);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{vmanage}}:{{port}}/dataservice/client/token",
+							"protocol": "https",
+							"host": [
+								"{{vmanage}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"dataservice",
+								"client",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "2. SD-WAN Fabric Devices",
+			"item": [
+				{
+					"name": "Fabric Devices",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "{{X-XSRF-TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://{{vmanage}}:{{port}}/dataservice/device",
+							"protocol": "https",
+							"host": [
+								"{{vmanage}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"dataservice",
+								"device"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Devices Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{vmanage}}:{{port}}/dataservice/device/monitor",
+							"protocol": "https",
+							"host": [
+								"{{vmanage}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"dataservice",
+								"device",
+								"monitor"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Device Counters",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "{{X-XSRF-TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://{{vmanage}}:{{port}}/dataservice/device/counters",
+							"protocol": "https",
+							"host": [
+								"{{vmanage}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"dataservice",
+								"device",
+								"counters"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Interface statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "{{X-XSRF-TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://{{vmanage}}:{{port}}/dataservice/statistics/interface",
+							"protocol": "https",
+							"host": [
+								"{{vmanage}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"dataservice",
+								"statistics",
+								"interface"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "3. SD-WAN Device Template",
+			"item": [
+				{
+					"name": "Template Feature",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "{{X-XSRF-TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://{{vmanage}}:{{port}}/dataservice/template/feature",
+							"protocol": "https",
+							"host": [
+								"{{vmanage}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"dataservice",
+								"template",
+								"feature"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Template Feature Type",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "{{X-XSRF-TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://{{vmanage}}:{{port}}/dataservice/template/feature/types",
+							"protocol": "https",
+							"host": [
+								"{{vmanage}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"dataservice",
+								"template",
+								"feature",
+								"types"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "4. SD-WAN Device Policy",
+			"item": [
+				{
+					"name": "vEdge Template Policy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{vmanage}}:{{port}}/dataservice/template/policy/vedge/devices",
+							"protocol": "https",
+							"host": [
+								"{{vmanage}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"dataservice",
+								"template",
+								"policy",
+								"vedge",
+								"devices"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Policy List",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-XSRF-TOKEN",
+								"value": "{{X-XSRF-TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://{{vmanage}}:{{port}}/dataservice/template/policy/list",
+							"protocol": "https",
+							"host": [
+								"{{vmanage}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"dataservice",
+								"template",
+								"policy",
+								"list"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
