@@ -18,8 +18,8 @@ import click
 import os
 import tabulate
 import yaml
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+import warnings
+warnings.filterwarnings('ignore', message='Unverified HTTPS request')
 
 vmanage_host = os.environ.get("vManage_IP")
 vmanage_port = os.environ.get("vManage_PORT")
@@ -50,8 +50,8 @@ class Authentication:
             jsessionid = cookies.split(";")
             return(jsessionid[0])
         except:
-            if logger is not None:
-                logger.error("No valid JSESSION ID returned\n")
+            if response.status_code != 200:
+                print("No valid JSESSION ID returned\n")
             exit()
        
     @staticmethod
