@@ -80,15 +80,15 @@ Options:
 
 Commands:
   attach            Attach a template with Cisco SDWAN.
-  attached_devices  Retrieve and return devices associated to a...
+  attached-devices  Retrieve and return devices associated to a...
   detach            Detach a template with Cisco SDWAN.
-  device_list       Retrieve and return network devices list.
-  template_list     Retrieve and return templates list.
+  device-list       Retrieve and return network devices list.
+  template-list     Retrieve and return templates list.
 ```
 
 Look at the available templates. Each template will provide the number of devices already attached and the template ID.
 
-`./sdwan.py template_list`
+`./sdwan.py template-list`
 
 OUTPUT
 
@@ -107,9 +107,9 @@ Retrieving the templates available.
 ╘═════════════════════════════╧═════════════════╧══════════════════════════════════════╧════════════════════╧════════════════════╛
 ```
 
-Retrieve the list of devices that make up the SD-WAN fabric with ./sdwan.py device_list.
+Retrieve the list of devices that make up the SD-WAN fabric with ./sdwan.py device-list.
 
-`$ ./sdwan.py device_list`
+`$ ./sdwan.py device-list`
 
 OUTPUT
 
