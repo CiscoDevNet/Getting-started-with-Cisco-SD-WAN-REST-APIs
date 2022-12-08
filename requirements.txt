@@ -1,6 +1,6 @@
 asn1crypto==0.24.0
 astroid==1.6.2
-certifi==2018.4.16
+certifi==2022.12.7
 cffi==1.15.0
 chardet==3.0.4
 ciscosparkapi==0.9.2
